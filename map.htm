@@ -1,0 +1,44 @@
+<html>
+<head>
+<title>gaMAP</title>
+<script src="js/jquery.js"></script>
+<script src="js/ui/jquery.ui.core.js"></script>
+<script src="js/ui/jquery.ui.widget.js"></script>
+<script src="js/ui/jquery.ui.mouse.js"></script>
+<script src="js/ui/jquery.ui.draggable.js"></script>
+<script src="js/jquery-collision-1.0.1.js"></script>
+<script src="js/jquery-ui-draggable-collision-1.0.1.js"></script>
+<script src="js/items.js"></script>
+<script src="js/gamap.js"></script>
+<script src="js/editor.js"></script>
+<link rel="stylesheet" type="text/css" href="css/items.css" />
+<style type="text/css">
+
+</style>
+<script type="text/javascript">
+
+$(document).ready(function() {
+	Map.init('map4');
+	Map.moveMap(-1087,-384);
+	Map.movePlayer(190,90);
+	Map.addItem({name:'cave_rock1',x:55,y:40});	
+	Map.addItem({name:'cave_land',x:155,y:40});	
+	
+	/* Map Editor */ 
+	Editor.init();
+});
+</script>
+</head>
+<body>
+<div>
+	<div id="currentMap" class="map">
+		<div id="myPlayer" class="player">
+			<img style="z-index:2;position: absolute;" src="avatars/0Down.png"/>
+		</div>
+	</div>
+	<div id="mapEditor">
+		<div id="items"></div>
+	</div>
+</div>
+</body>
+</html>
