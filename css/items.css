@@ -1,3 +1,6 @@
+.pointer{
+	cursor: pointer;
+}
 .map{
 	position:absolute;
 	z-index:1;
@@ -18,11 +21,6 @@
 	width: 112px;
 	height: 243px;
 }
-.cave_land{
-	background-position: -1299px -61px !important;
-	width: 48px;
-	height: 32px;
-}
 .cave_rock1{
 	background-position: -1448px -78px !important;
 	width: 16px;
@@ -33,3 +31,48 @@
 	width: 16px;
 	height: 16px;
 }
+.cave_land{
+	background-position: -1299px -61px !important;
+	width: 48px;
+	height: 32px;
+}
+.grass_land{
+	background-position: -6px -1805px !important;
+    height: 25px;
+    width: 48px;
+}
+.grass_border1{
+	background-position: -1917px -334px !important;
+    height: 191px;
+    width: 7px;
+}
+.grass_border2{
+	background-position: -1614px -616px !important;
+    height: 14px;
+    width: 239px;
+}
+.building_chinese1{
+	background-position: -1647px -642px !important;
+    height: 144px;
+    width: 212px;
+}
+.building_modern1{
+	background-position: -1632px -796px !important;
+    height: 80px;
+    width: 112px;
+}
+.building_modern2{
+	background-position: -1760px -796px !important;
+    height: 72px;
+    width: 112px;
+}
+.grass_bridge1{
+	background-position: -1799px -924px !important;
+    height: 144px;
+    width: 31px;
+}
+.building_star1{
+	background-position: -1632px -898px !important;
+    height: 64px;
+    width: 80px;
+}	

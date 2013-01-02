@@ -6,15 +6,23 @@ var Map=
 	playerPos:{},
 	itemPos:{},
 	debug:true,
-	init:function(map)
+	init:function(data)
 	{
+		for(k in data){
+			var itm=data[k];
+			if(itm.name=='playerPos'){
+				Map.movePlayer(itm.x,itm.y);
+				data.splice(k, 1);
+			}
+		}
+		Map.addItems(data);
 		if($('#'+this.mapDiv).length<1){
 			$('body').prepend('<div id="'+this.mapDiv+'" class="map"></div>');
 		}else{ //we collect current map info
 			this.mapSize.x=parseFloat($('#'+this.mapDiv).css('width').replace(/[^-\d\.]/g, ''));
 			this.mapSize.y=parseFloat($('#'+this.mapDiv).css('height').replace(/[^-\d\.]/g, ''));
 		}
-		$('#'+this.mapDiv).css('background-image','url(\'maps/'+map+'.png\')');
+		//$('#'+this.mapDiv).css('background-image','url(\'maps/'+map+'.png\')');
 
 		document.onkeydown = this.movePlayer;
 		/*$(document).keypress(function(event) //didnt catch game keys 
@@ -104,10 +112,10 @@ var Map=
 			while(true)
 			{
 				$('#myPlayer img').css(property,i+'px');
-				var collisions=$("#myPlayer img").collision('.mapSprite');
+				var collisions=$("#myPlayer img").collision('.mapSprite[type!=walk]');
 				if(collisions.length>0)// collision detected, checking item type
 				{
-					var itm=$(collisions[0]).attr('type');
+					var itm=$(collisions[0]).attr('name');
 					//console.log(items[itm]);
 					
 					if(items[itm].type=='solid'){
@@ -179,7 +187,17 @@ var Map=
 			this.itemPos[obj.x]={};
 		}
 		this.itemPos[obj.x][obj.y]=obj.name;
-		$('#currentMap').append('<div class="mapSprite '+obj.name+'" type="'+obj.name+'" style="position:absolute;left:'+obj.x+'px;top:'+obj.y+'px;"></div>');
-	}
+		$('#currentMap').append('<div class="mapSprite '+obj.name+'" name="'+obj.name+'" type="'+items[obj.name].type+'" style="position:absolute;left:'+obj.x+'px;top:'+obj.y+'px;"></div>');
+		if(typeof Editor !='undefined'){
+			if(Editor.initalized){
+				$("#currentMap .mapSprite" ).draggable({ containment: "#currentMap", obstacle: ".mapSprite", preventCollision: true });
+			}
+		}
+	},
+	addItems:function(arr){
+		for(k in arr){
+			this.addItem(arr[k]);
+		}
+	},
 
 }
