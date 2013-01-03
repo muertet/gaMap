@@ -3,6 +3,8 @@ gaMap
 
 2D jQuery based mapping system for games.
 
+Pic: http://i47.tinypic.com/2ujjg46.png
+
 Uses:
 * jQuery
 * jQuery UI
@@ -19,6 +21,9 @@ Map class
 * Map.addItem
 * Map.addItems
 * Map.hotKeys
+* Map.killPlayer
+* Map.addPlayer
+* Map.abort
 
 Editor class
 =====
@@ -30,6 +35,9 @@ Editor class
 * Editor.createSchema
 * Editor.saveMap
 * Editor.loadMap
+* Editor.deleteMode
+* Editor.modTeleport
+
 
 
 Item types:
