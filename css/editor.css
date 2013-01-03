@@ -20,3 +20,10 @@
 #editorSaving img{
 	height:25px;
 }
+.deleteMode item:hover{
+	background-color:#cc4233;
+	opacity:0.4;
+}
+#teleportSelect{
+	width:200px;
+}

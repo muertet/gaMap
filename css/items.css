@@ -74,12 +74,16 @@
     width: 80px;
 }
 .teleport_area{
-	background-color:#53ca35;
 	height: 144px;
     width: 31px;
 }
 .playerSpawn{
-	background-color:#f807f1;
 	height: 23px;
     width: 17px;
+}
+.editorMode .teleport_area{
+	background-color:#53ca35;
+}
+.editorMode .playerSpawn{
+	background-color:#f807f1;
 }

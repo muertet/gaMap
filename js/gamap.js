@@ -9,6 +9,7 @@ var Map=
 	debug:true,
 	loadingArea:false,
 	initialized:false,
+	editing:false,
 	init:function(data)
 	{
 		var itemsArea=[];
@@ -16,7 +17,7 @@ var Map=
 		
 		// data check
 			if(typeof data.areas =='undefined'){
-				alert('Missing map areas. [Areas not found]');return false;
+				alert('Missing map areas. [Areas not found]');Map.abort();return false;
 			}
 		//--
 		
@@ -27,6 +28,7 @@ var Map=
 				Map.movePlayer(data.playerPos.x,data.playerPos.y);
 			}else{
 				alert('Missing map areas or invalid save game. [player area not found]');
+				Map.abort();
 				return false;
 			}
 		}else{
@@ -34,6 +36,7 @@ var Map=
 				itemsArea=data.areas['area0'];
 			}else{
 				alert('Missing map areas. [Area0 not found]');
+				Map.abort();
 				return false;
 			}
 		}
@@ -53,17 +56,30 @@ var Map=
 		{
 			Map.movePlayer(event.which);
 		});*/
+		
+		//are we in edition mode?
+		if(typeof Editor !='undefined'){
+			if(Editor.initialized){this.editing=true;}
+		}
 	},
 	changeArea:function(area)
 	{
+		if(typeof area =='undefined'){return false;}
+		
 		this.loadingArea=true;
+		
+		if(isInteger(area)){area='area'+area;}
 		if(this.debug){console.log("Moving to "+area);}
 		
 		$('#'+this.mapDiv+' item').remove(); //unload items
+		this.killPlayer(); //to respawn it in addItems
 		
 		this.addItems(this.areas[area]);
 		this.loadingArea=false;
 		
+		if($('#myPlayer').length<1){
+			alert("ERROR: This area ["+area+"] doesn't have any spawn point");Map.abort();return false;
+		}
 		
 		/* Should we change player pos?
 		if(this.mapPos.x==x){
@@ -87,6 +103,11 @@ var Map=
 	},
 	movePlayer:function(key,y)
 	{
+		//setup player
+		if($('#myPlayer').length<1){
+			Map.addPlayer();
+		}
+		
 		var avatar='Down';
 		if(typeof y =='undefined')
 		{
@@ -149,10 +170,11 @@ var Map=
 				var collisions=$("#myPlayer img").collision('item[type!=walk]');
 				if(collisions.length>0)// collision detected, checking item type
 				{
-					var itm=$(collisions[0]).attr('name');
+					var itm=collisions[0],
+						name=$(itm).attr('name');
 					//console.log(items[itm]);
 					
-					if(items[itm].type=='solid'){
+					if(items[name].type=='solid'){
 						//console.log(pixels,lastI,property,Map.playerPos.x,Map.playerPos.y);
 						$('#myPlayer img').css(property,lastI+'px');
 						if(property=='left'){
@@ -161,6 +183,10 @@ var Map=
 							Map.playerPos.y=lastI;
 						}
 						console.log('cant');return false;
+					}else if(items[name].type=='teleport'){
+						var to=$(itm).attr('to');
+						console.log('teleporting to area '+to);
+						Map.changeArea(to);
 					}
 					
 				}
@@ -183,8 +209,8 @@ var Map=
 				Map.playerPos.y=pixels;
 			}
 			
-			//detect map change
-			if(property=='top' && (pixels>=230 || pixels<=6))
+			//detect map change - DEPRECATED
+			/*if(property=='top' && (pixels>=230 || pixels<=6))
 			{
 				var y=Map.mapPos.y;
 				if(pixels<=6){
@@ -204,6 +230,7 @@ var Map=
 				
 				Map.moveMap(x,Map.mapPos.y);
 			}
+			*/
 		}else{
 			$('#myPlayer img').css('top',y);
 			$('#myPlayer img').css('left',key);
@@ -221,23 +248,44 @@ var Map=
 			this.itemPos[obj.x]={};
 		}
 		this.itemPos[obj.x][obj.y]=obj.name;
-		var sprite='';
+		var sprite='',
+			teleport='';
 		
 		//check if object is set
 		if(typeof items[obj.name] =='undefined'){
 			alert('no data found for object: '+obj.name);
+			Map.abort();
 			return false;
 		}
 		if(typeof items[obj.name].sprite !='undefined'){
 			sprite=items[obj.name].sprite;
 		}
 		
-		$('#currentMap').append('<item class="'+sprite+' '+obj.name+'" name="'+obj.name+'" type="'+items[obj.name].type+'" style="position:absolute;left:'+obj.x+'px;top:'+obj.y+'px;"></item>');
-
-		if(typeof Editor !='undefined'){
-			if(Editor.initialized){
-				$("#currentMap item" ).draggable({ containment: "#currentMap", obstacle: "item", preventCollision: true });
+		//Spawn point? teleport point?
+		if(items[obj.name].type=='spawn' && $('#myPlayer').length<1 && !this.editing){
+			this.movePlayer(obj.x,obj.y);
+		}
+		else if(items[obj.name].type=='teleport')
+		{
+			if(typeof obj.to =='undefined'){
+				if(this.editing){
+					teleport='';
+				}else{
+					alert('Teleport with no destination found, mapping stopped.');
+					Map.abort();
+					return false;
+				}
+			}else{
+				teleport='to="'+obj.to+'"';
 			}
+			
+		}
+		//-
+		
+		$('#currentMap').append('<item class="'+sprite+' '+obj.name+'" '+teleport+' name="'+obj.name+'" type="'+items[obj.name].type+'" style="position:absolute;left:'+obj.x+'px;top:'+obj.y+'px;"></item>');
+
+		if(this.editing){
+			$("#currentMap item" ).draggable({ containment: "#currentMap", obstacle: "item", preventCollision: true });
 		}
 	},
 	addItems:function(arr){
@@ -265,5 +313,27 @@ var Map=
 			break;
 		}
 	},
+	killPlayer:function(){
+		$('#myPlayer').remove();	
+	},
+	addPlayer:function()
+	{
+		if($('#myPlayer').length<1){
+			var html='<div id="myPlayer" class="player">'+
+				'<img style="z-index:2;position: absolute;" src="images/avatars/0Down.png"/>'+
+			'</div>';
+			$('#'+Map.mapDiv).prepend(html);	
+		}else{
+			return false;
+		}
+	},
+	abort:function(){
+		if(!this.editing){
+			$('#'+this.mapDiv).remove();
+		}
+	},
 
+}
+function isInteger(s) {
+  return (s.toString().search(/^-?[0-9]+$/) == 0);
 }
