@@ -48,5 +48,5 @@ Item types:
 * Interactive: ---
 
 Adding new items:
+* Edit items.js and items.css, refresh page and they should appear in editor.htm [scenario select]
 
-About the editor, it's recommended to start mapping by the ground.
