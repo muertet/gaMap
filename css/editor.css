@@ -1,0 +1,22 @@
+.pointer{
+	cursor: pointer;
+}
+.border{
+	border:1px solid;
+}
+#firstMenu{
+	margin-left:30%;
+}
+#firstMenu .option{
+	float:left;
+	height:230px;
+	width:200px;
+	padding:5px;
+}
+#editorSaving{
+	width:140px;
+	float:right;
+}
+#editorSaving img{
+	height:25px;
+}

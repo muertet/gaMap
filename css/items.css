@@ -1,6 +1,3 @@
-.pointer{
-	cursor: pointer;
-}
 .map{
 	position:absolute;
 	z-index:1;
@@ -13,7 +10,7 @@
 	float:right;
 }
 .mapSprite{
-	background:url('../sprites/sprite.png') no-repeat;
+	background:url('../images/sprites/sprite.png') no-repeat;
 	width:2px;
 }
 .tower{
@@ -75,4 +72,14 @@
 	background-position: -1632px -898px !important;
     height: 64px;
     width: 80px;
-}	
+}
+.teleport_area{
+	background-color:#53ca35;
+	height: 144px;
+    width: 31px;
+}
+.playerSpawn{
+	background-color:#f807f1;
+	height: 23px;
+    width: 17px;
+}
