@@ -1,0 +1,35 @@
+.map{
+	position:absolute;
+	z-index:1;
+	border: 1px solid darkred;
+	background-repeat: no-repeat;
+	width:336px;
+	height:240px;
+}
+#mapEditor{
+	float:right;
+}
+.mapSprite{
+	background:url('../sprites/sprite.png') no-repeat;
+	width:2px;
+}
+.tower{
+	background-position: -7px -74px !important;
+	width: 112px;
+	height: 243px;
+}
+.cave_land{
+	background-position: -1299px -61px !important;
+	width: 48px;
+	height: 32px;
+}
+.cave_rock1{
+	background-position: -1448px -78px !important;
+	width: 16px;
+	height: 16px;
+}
+.cave_rock2{
+	background-position: -1472px -78px !important;
+	width: 16px;
+	height: 16px;
+}
