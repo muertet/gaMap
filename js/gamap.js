@@ -2,27 +2,51 @@ var Map=
 {
 	mapDiv:"currentMap",
 	mapSize:{x:336,y:240},
+	areas:{},
 	mapPos:{},
 	playerPos:{},
 	itemPos:{},
 	debug:true,
+	loadingArea:false,
+	initialized:false,
 	init:function(data)
 	{
-		for(k in data){
-			var itm=data[k];
-			if(itm.name=='playerPos'){
-				Map.movePlayer(itm.x,itm.y);
-				data.splice(k, 1);
+		var itemsArea=[];
+		this.initialized=true;
+		
+		// data check
+			if(typeof data.areas =='undefined'){
+				alert('Missing map areas. [Areas not found]');return false;
+			}
+		//--
+		
+		//saved game?
+		if(typeof data['playerPos'] !='undefined'){
+			if(typeof data.areas['area'+data.playerPos.area] !='undefined'){
+				itemsArea=data.areas['area'+data.playerPos.area];
+				Map.movePlayer(data.playerPos.x,data.playerPos.y);
+			}else{
+				alert('Missing map areas or invalid save game. [player area not found]');
+				return false;
+			}
+		}else{
+			if(typeof data.areas['area0'] !='undefined'){
+				itemsArea=data.areas['area0'];
+			}else{
+				alert('Missing map areas. [Area0 not found]');
+				return false;
 			}
 		}
-		Map.addItems(data);
+		
 		if($('#'+this.mapDiv).length<1){
 			$('body').prepend('<div id="'+this.mapDiv+'" class="map"></div>');
 		}else{ //we collect current map info
 			this.mapSize.x=parseFloat($('#'+this.mapDiv).css('width').replace(/[^-\d\.]/g, ''));
 			this.mapSize.y=parseFloat($('#'+this.mapDiv).css('height').replace(/[^-\d\.]/g, ''));
 		}
-		//$('#'+this.mapDiv).css('background-image','url(\'maps/'+map+'.png\')');
+		
+		Map.areas=data.areas;
+		Map.addItems(itemsArea);
 
 		document.onkeydown = this.movePlayer;
 		/*$(document).keypress(function(event) //didnt catch game keys 
@@ -30,10 +54,18 @@ var Map=
 			Map.movePlayer(event.which);
 		});*/
 	},
-	moveMap:function(x,y)
+	changeArea:function(area)
 	{
-		if(this.debug){console.log("Moving map ("+x+","+y+")");}
-		/* Must we change player pos? */
+		this.loadingArea=true;
+		if(this.debug){console.log("Moving to "+area);}
+		
+		$('#'+this.mapDiv+' item').remove(); //unload items
+		
+		this.addItems(this.areas[area]);
+		this.loadingArea=false;
+		
+		
+		/* Should we change player pos?
 		if(this.mapPos.x==x){
 			var playerY=0;
 			if(this.mapPos.y<y){
@@ -46,10 +78,11 @@ var Map=
 				playerX=this.mapSize.x;
 			}
 			this.movePlayer(playerX,this.playerPos.y);
-		}
+		} 
 		this.mapPos.x=x;
 		this.mapPos.y=y;
 		$('#'+this.mapDiv).css('background-position',x+'px '+y+'px');
+		*/
 		
 	},
 	movePlayer:function(key,y)
@@ -86,6 +119,7 @@ var Map=
 					avatar='Left';
 				break;
 				default:
+					Map.hotKeys(tecla);
 					return false;
 				break;
 			}
@@ -112,7 +146,7 @@ var Map=
 			while(true)
 			{
 				$('#myPlayer img').css(property,i+'px');
-				var collisions=$("#myPlayer img").collision('.mapSprite[type!=walk]');
+				var collisions=$("#myPlayer img").collision('item[type!=walk]');
 				if(collisions.length>0)// collision detected, checking item type
 				{
 					var itm=$(collisions[0]).attr('name');
@@ -179,7 +213,7 @@ var Map=
 			this.playerPos.x=key;
 		}
 		
-		$('#myPlayer img').attr('src','avatars/0'+avatar+'.png');
+		$('#myPlayer img').attr('src','images/avatars/0'+avatar+'.png');
 	},
 	addItem:function(obj)
 	{
@@ -187,16 +221,48 @@ var Map=
 			this.itemPos[obj.x]={};
 		}
 		this.itemPos[obj.x][obj.y]=obj.name;
-		$('#currentMap').append('<div class="mapSprite '+obj.name+'" name="'+obj.name+'" type="'+items[obj.name].type+'" style="position:absolute;left:'+obj.x+'px;top:'+obj.y+'px;"></div>');
+		var sprite='';
+		
+		//check if object is set
+		if(typeof items[obj.name] =='undefined'){
+			alert('no data found for object: '+obj.name);
+			return false;
+		}
+		if(typeof items[obj.name].sprite !='undefined'){
+			sprite=items[obj.name].sprite;
+		}
+		
+		$('#currentMap').append('<item class="'+sprite+' '+obj.name+'" name="'+obj.name+'" type="'+items[obj.name].type+'" style="position:absolute;left:'+obj.x+'px;top:'+obj.y+'px;"></item>');
+
 		if(typeof Editor !='undefined'){
-			if(Editor.initalized){
-				$("#currentMap .mapSprite" ).draggable({ containment: "#currentMap", obstacle: ".mapSprite", preventCollision: true });
+			if(Editor.initialized){
+				$("#currentMap item" ).draggable({ containment: "#currentMap", obstacle: "item", preventCollision: true });
 			}
 		}
 	},
 	addItems:function(arr){
 		for(k in arr){
 			this.addItem(arr[k]);
+		}
+	},
+	hotKeys:function(key){
+		switch(key){
+			case 88: // X/M bag
+			case 77:
+				if($('#gameMenu').length>0){
+					$('#gameMenu').toggleClass('oculto');
+				}else{
+					var html='<div id="gameMenu" style="margin-left:'+Map.mapSize.x+'px;float:left;border:1px solid;height:'+Map.mapSize.y+'px;width:120px;"><ul>'+
+						'<li>Op1</li>'+
+						'<li>Op2</li>'+
+						'<li>Op3</li>'+
+						'<li>Op4</li>'+
+					'</ul></div>';
+					$('body').append(html);
+				}
+			break;
+			case 27: //ESC
+			break;
 		}
 	},
 
