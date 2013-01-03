@@ -1,6 +1,7 @@
 var items={
 playerSpawn:{type:'spawn',scenario:"player"},
 teleport_area:{type:'teleport',scenario:"teleport"},
+teleport_quadrant:{type:'teleport',scenario:"teleport"},
 cave_rock1:{type:'solid',scenario:"cave",sprite:"mapSprite"},
 cave_rock2:{type:'solid',scenario:"cave",sprite:"mapSprite"},
 cave_land:{type:'walk',scenario:"cave",sprite:"mapSprite"},

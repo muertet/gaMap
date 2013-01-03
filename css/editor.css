@@ -25,5 +25,10 @@
 	opacity:0.4;
 }
 #teleportSelect{
-	width:200px;
+	margin: 5px;
+    padding: 2px;
+	width:370px;
+}
+#items div{
+	margin:5px;
 }

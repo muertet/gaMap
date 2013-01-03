@@ -10,10 +10,16 @@ var Map=
 	loadingArea:false,
 	initialized:false,
 	editing:false,
+	numTeleports:0,
 	init:function(data)
 	{
 		var itemsArea=[];
 		this.initialized=true;
+		
+		//are we in edition mode?
+		if(typeof Editor !='undefined'){
+			if(Editor.initialized){this.editing=true;}
+		}
 		
 		// data check
 			if(typeof data.areas =='undefined'){
@@ -57,27 +63,54 @@ var Map=
 			Map.movePlayer(event.which);
 		});*/
 		
-		//are we in edition mode?
-		if(typeof Editor !='undefined'){
-			if(Editor.initialized){this.editing=true;}
+		//search the teleport again (0% optimization lol, this sucks)
+		for(k in Map.areas)
+		{
+			for(o in Map.areas[k])
+			{	
+				var preObj=Map.areas[k][o],
+					obj=Item.info(preObj.name);
+				if(obj.type=='teleport')
+				{
+					this.numTeleports++;
+				}
+			}
 		}
+		
 	},
-	changeArea:function(area)
+	changeArea:function(teleportId)
 	{
-		if(typeof area =='undefined'){return false;}
+		if(typeof teleportId =='undefined'){return false;}
 		
 		this.loadingArea=true;
+		var found=false;
 		
-		if(isInteger(area)){area='area'+area;}
-		if(this.debug){console.log("Moving to "+area);}
+		//search the teleport again (0% optimization lol, this sucks)
+		for(k in Map.areas)
+		{
+			for(o in Map.areas[k])
+			{	
+				var preObj=Map.areas[k][o],
+					obj=Item.info(preObj.name);
+				if(obj.type=='teleport' && preObj.id==parseInt(teleportId))
+				{
+					var area=k;
+					found=true;
+					break;
+				}
+			}
+			if(found){break;}
+		}
+		if(this.debug){console.log("Using teleport "+teleportId+" to "+area);}
 		
 		$('#'+this.mapDiv+' item').remove(); //unload items
 		this.killPlayer(); //to respawn it in addItems
 		
 		this.addItems(this.areas[area]);
+		this.movePlayer(preObj.x,preObj.y);
 		this.loadingArea=false;
 		
-		if($('#myPlayer').length<1){
+		if($('#myPlayer').length<1 && !this.editing){
 			alert("ERROR: This area ["+area+"] doesn't have any spawn point");Map.abort();return false;
 		}
 		
@@ -185,7 +218,6 @@ var Map=
 						console.log('cant');return false;
 					}else if(items[name].type=='teleport'){
 						var to=$(itm).attr('to');
-						console.log('teleporting to area '+to);
 						Map.changeArea(to);
 					}
 					
@@ -208,30 +240,9 @@ var Map=
 			}else{
 				Map.playerPos.y=pixels;
 			}
-			
-			//detect map change - DEPRECATED
-			/*if(property=='top' && (pixels>=230 || pixels<=6))
-			{
-				var y=Map.mapPos.y;
-				if(pixels<=6){
-					y+=Map.mapSize.y;
-				}else{
-					y-=Map.mapSize.y;
-				}
-				Map.moveMap(Map.mapPos.x,y);
-			}else if(property=='left' && (pixels>=330 || pixels<=6)){
-				
-				var x=Map.mapPos.x;
-				if(pixels<=6){
-					x+=Map.mapSize.x;
-				}else{
-					x-=Map.mapSize.x;
-				}
-				
-				Map.moveMap(x,Map.mapPos.y);
-			}
-			*/
+
 		}else{
+			console.log('moving player pos ('+key+','+y+')');
 			$('#myPlayer img').css('top',y);
 			$('#myPlayer img').css('left',key);
 			
@@ -249,7 +260,9 @@ var Map=
 		}
 		this.itemPos[obj.x][obj.y]=obj.name;
 		var sprite='',
-			teleport='';
+			teleport='',
+			prepend=false,
+			text='';
 		
 		//check if object is set
 		if(typeof items[obj.name] =='undefined'){
@@ -266,24 +279,38 @@ var Map=
 			this.movePlayer(obj.x,obj.y);
 		}
 		else if(items[obj.name].type=='teleport')
-		{
+		{	
+			if(typeof obj.id =='undefined'){
+				this.numTeleports++;
+				obj.id=this.numTeleports;
+			}
+			teleport='teleportid="'+obj.id+'" ';
 			if(typeof obj.to =='undefined'){
-				if(this.editing){
-					teleport='';
-				}else{
-					alert('Teleport with no destination found, mapping stopped.');
+				if(!this.editing){
+					alert('Teleport with no destination/id found, mapping stopped.');
 					Map.abort();
 					return false;
 				}
 			}else{
-				teleport='to="'+obj.to+'"';
+				teleport+='to="'+obj.to+'"';
+			}
+			if(this.editing){//show teleport id in map
+				text=obj.id;
 			}
 			
+		}else if(items[obj.name].type=='walk'){
+			prepend=true;
 		}
-		//-
+		//--
 		
-		$('#currentMap').append('<item class="'+sprite+' '+obj.name+'" '+teleport+' name="'+obj.name+'" type="'+items[obj.name].type+'" style="position:absolute;left:'+obj.x+'px;top:'+obj.y+'px;"></item>');
-
+		var itemLine='<item class="'+sprite+' '+obj.name+'" '+teleport+' name="'+obj.name+'" type="'+items[obj.name].type+'" style="position:absolute;left:'+obj.x+'px;top:'+obj.y+'px;">'+text+'</item>';
+		
+		if(prepend){
+			$('#currentMap').prepend(itemLine);
+		}else{
+			$('#currentMap').append(itemLine);
+		}
+		
 		if(this.editing){
 			$("#currentMap item" ).draggable({ containment: "#currentMap", obstacle: "item", preventCollision: true });
 		}

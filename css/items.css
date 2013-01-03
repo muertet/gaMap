@@ -81,7 +81,11 @@
 	height: 23px;
     width: 17px;
 }
-.editorMode .teleport_area{
+.teleport_quadrant{
+	height: 31px;
+    width: 31px;
+}
+.editorMode .teleport_area,.teleport_quadrant{
 	background-color:#53ca35;
 }
 .editorMode .playerSpawn{
