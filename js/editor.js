@@ -1,6 +1,6 @@
 var Editor={
 
-	menu:[],
+    menu:[],
 	initialized:false,
 	debug:true,
 	deleteModeStatus:false,

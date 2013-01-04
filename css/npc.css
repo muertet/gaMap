@@ -1,45 +1,50 @@
 .lab_guy1-front{
-	background-position: -847px -1747px !important;
-	width: 16px;
-	height: 20px;
+    background-position: -848px -1746px !important;
+ 	height: 21px;
+    width: 14px;
 }
 .lab_guy1-front-step1{
 	background-position: -847px -1777px !important;
-	width: 16px;
+	width: 12px;
 	height: 20px;
 }
 .lab_guy1-front-step2{
 	background-position: -847px -1807px !important;
-	width: 16px;
+	width: 12px;
 	height: 20px;
 }
 .lab_guy1-left{
-	background-position: -877px -1747px !important;
-	width: 16px;
+	background-position: -879px -1747px !important;
+	width: 12px;
 	height: 20px;
 }
 .lab_guy1-left-step1{
-	background-position: -877px -1777px !important;
-	width: 16px;
+	background-position: -879px -1777px !important;
+	width: 12px;
 	height: 20px;
 }
 .lab_guy1-left-step2{
-	background-position: -877px -1807px !important;
-	width: 16px;
+	background-position: -879px -1807px !important;
+	width: 12px;
 	height: 20px;
 }
 .lab_guy1-back{
-	background-position: -877px -1747px !important;
-	width: 16px;
+	background-position: -908px -1747px !important;
+    width: 14px;
 	height: 20px;
 }
 .lab_guy1-back-step1{
-	background-position: -877px -1777px !important;
-	width: 16px;
+	background-position: -879px -1777px !important;
+	width: 12px;
 	height: 20px;
 }
 .lab-guy1_back-step2{
-	background-position: -877px -1807px !important;
-	width: 16px;
+	background-position: -879px -1807px !important;
+	width: 12px;
 	height: 20px;
+}
+.lab_guy1-right{
+    background-position: -939px -1747px !important;
+    height: 20px;
+    width: 12px;
 }

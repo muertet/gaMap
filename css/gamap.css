@@ -3,5 +3,9 @@ body {
     font-size: 12px;
 }
 .oculto{
-	display:none;
+    display:none;
+}
+.item,.player{
+	position:absolute;
+	z-index:2;
 }

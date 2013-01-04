@@ -1,6 +1,6 @@
 var Map=
 {
-	mapDiv:"currentMap",
+    mapDiv:"currentMap",
 	mapSize:{x:336,y:240},
 	areas:{},
 	mapPos:{},
@@ -9,8 +9,10 @@ var Map=
 	debug:true,
 	loadingArea:false,
 	initialized:false,
+	multiplayer:false,
 	editing:false,
 	numTeleports:0,
+	uid:0,
 	init:function(data)
 	{
 		var itemsArea=[];
@@ -31,7 +33,7 @@ var Map=
 		if(typeof data['playerPos'] !='undefined'){
 			if(typeof data.areas['area'+data.playerPos.area] !='undefined'){
 				itemsArea=data.areas['area'+data.playerPos.area];
-				Map.movePlayer(data.playerPos.x,data.playerPos.y);
+				Map.movePlayer(data.playerPos.uid,data.playerPos.x,data.playerPos.y);
 			}else{
 				alert('Missing map areas or invalid save game. [player area not found]');
 				Map.abort();
@@ -54,16 +56,22 @@ var Map=
 			this.mapSize.y=parseFloat($('#'+this.mapDiv).css('height').replace(/[^-\d\.]/g, ''));
 		}
 		
+		if(!this.multiplayer){
+			this.uid=0;
+			this.defaultPlayer(0);
+		}else{
+			//nodeJS
+		}
+		
 		Map.areas=data.areas;
 		Map.addItems(itemsArea);
+						
+		$(document).keydown(function(e){
+			Map.movePlayer(Map.uid,e.keyCode);
+		});
 
-		document.onkeydown = this.movePlayer;
-		/*$(document).keypress(function(event) //didnt catch game keys 
-		{
-			Map.movePlayer(event.which);
-		});*/
 		
-		//search the teleport again (0% optimization lol, this sucks)
+		//search the teleport again (0% optimization, sucks)
 		for(k in Map.areas)
 		{
 			for(o in Map.areas[k])
@@ -85,7 +93,7 @@ var Map=
 		this.loadingArea=true;
 		var found=false;
 		
-		//search the teleport again (0% optimization lol, this sucks)
+		//search the teleport again (0% optimization, sucks)
 		for(k in Map.areas)
 		{
 			for(o in Map.areas[k])
@@ -104,13 +112,13 @@ var Map=
 		if(this.debug){console.log("Using teleport "+teleportId+" to "+area);}
 		
 		$('#'+this.mapDiv+' item').remove(); //unload items
-		this.killPlayer(); //to respawn it in addItems
+		this.killPlayer(this.uid); //to respawn it in addItems
 		
 		this.addItems(this.areas[area]);
-		this.movePlayer(preObj.x,preObj.y);
+		this.movePlayer(this.uid,preObj.x,preObj.y);
 		this.loadingArea=false;
 		
-		if($('#myPlayer').length<1 && !this.editing){
+		if($('#player'+this.uid).length<1 && !this.editing){
 			alert("ERROR: This area ["+area+"] doesn't have any spawn point");Map.abort();return false;
 		}
 		
@@ -134,51 +142,50 @@ var Map=
 		*/
 		
 	},
-	movePlayer:function(key,y)
+	movePlayer:function(uid,key,y)
 	{
 		//setup player
-		if($('#myPlayer').length<1){
-			Map.addPlayer();
+		if($('#player'+uid).length<1){
+			Map.addPlayer(uid);
 		}
 		
-		var avatar='Down';
+		var avatar='front';
 		if(typeof y =='undefined')
 		{
 			
-	   		var tecla = (window.event) ? event.keyCode : key.keyCode,
-				pixels=0,
+	   		var pixels=0,
 				property='',
 				negative=false;
-			switch(tecla){
+			switch(key){
 				case 83: //avall
 				case 40:
 					property='top';
-					avatar='Down';
+					avatar='front';
 				break;
 				case 87: //adalt
 				case 38:
 					property='top';
 					negative=true;
-					avatar='Up';
+					avatar='back';
 				break;
 				case 68: //dreta
 				case 39:
 					property='left';
-					avatar='Right';
+					avatar='right';
 				break;
 				case 65://esquerra
 				case 37:
 					property='left';
 					negative=true;
-					avatar='Left';
+					avatar='left';
 				break;
 				default:
-					Map.hotKeys(tecla);
+					Map.hotKeys(key);
 					return false;
 				break;
 			}
 			
-			pixels=$('#myPlayer img').css(property).replace(/[^-\d\.]/g, '');
+			pixels=$('#player'+uid).css(property).replace(/[^-\d\.]/g, '');
 			if(pixels=="auto" || pixels==""){
 				pixels=0;
 			}else{
@@ -192,15 +199,15 @@ var Map=
 			// check if i can do following step
 			var i=0,lastI=0;
 			if(property=='left'){
-				i=Map.playerPos.x;
+				i=Map.playerPos[uid].x;
 			}else{
-				i=Map.playerPos.y;
+				i=Map.playerPos[uid].y;
 			}
 			lastI=i;
 			while(true)
 			{
-				$('#myPlayer img').css(property,i+'px');
-				var collisions=$("#myPlayer img").collision('item[type!=walk]');
+				$('#player'+uid).css(property,i+'px');
+				var collisions=$('#player'+uid).collision('item[type!=walk]');
 				if(collisions.length>0)// collision detected, checking item type
 				{
 					var itm=collisions[0],
@@ -209,11 +216,11 @@ var Map=
 					
 					if(items[name].type=='solid'){
 						//console.log(pixels,lastI,property,Map.playerPos.x,Map.playerPos.y);
-						$('#myPlayer img').css(property,lastI+'px');
+						$('#player'+uid).css(property,lastI+'px');
 						if(property=='left'){
-							Map.playerPos.x=lastI;
+							Map.playerPos[uid].x=lastI;
 						}else{
-							Map.playerPos.y=lastI;
+							Map.playerPos[uid].y=lastI;
 						}
 						console.log('cant');return false;
 					}else if(items[name].type=='teleport'){
@@ -232,26 +239,29 @@ var Map=
 					i++;
 				}
 			}
-			//$('#myPlayer img').css(property,pixels+'px');
 			
 			/* Update playerPos*/
 			if(property=='left'){
-				Map.playerPos.x=pixels;
+				Map.playerPos[uid].x=pixels;
 			}else{
-				Map.playerPos.y=pixels;
+				Map.playerPos[uid].y=pixels;
 			}
 
 		}else{
-			console.log('moving player pos ('+key+','+y+')');
-			$('#myPlayer img').css('top',y);
-			$('#myPlayer img').css('left',key);
+			if(this.debug){console.log('moving player pos ('+uid+','+key+','+y+')')};
+			$('#player'+uid).css('top',y);
+			$('#player'+uid).css('left',key);
 			
 			/* Update playerPos*/
-			this.playerPos.y=y;
-			this.playerPos.x=key;
+			this.playerPos[uid].y=y;
+			this.playerPos[uid].x=key;
 		}
 		
-		$('#myPlayer img').attr('src','images/avatars/0'+avatar+'.png');
+		$('#player'+uid).removeClass(this.playerPos[uid].skin+'-front');
+		$('#player'+uid).removeClass(this.playerPos[uid].skin+'-left');
+		$('#player'+uid).removeClass(this.playerPos[uid].skin+'-right');
+		$('#player'+uid).removeClass(this.playerPos[uid].skin+'-back');
+		$('#player'+uid).addClass(this.playerPos[uid].skin+'-'+avatar);
 	},
 	addItem:function(obj)
 	{
@@ -276,7 +286,7 @@ var Map=
 		
 		//Spawn point? teleport point?
 		if(items[obj.name].type=='spawn' && $('#myPlayer').length<1 && !this.editing){
-			this.movePlayer(obj.x,obj.y);
+			this.movePlayer(this.uid,obj.x,obj.y);
 		}
 		else if(items[obj.name].type=='teleport')
 		{	
@@ -320,6 +330,18 @@ var Map=
 			this.addItem(arr[k]);
 		}
 	},
+	defaultPlayer:function(uid){
+		if(typeof this.playerPos[uid] =='undefined'){
+			this.playerPos[uid]={
+				x:0,
+				y:0,
+				uid:uid,
+				skin:'lab_guy1',
+			};
+		}else if(typeof this.playerPos[this.uid].skin =='undefined'){
+			this.playerPos[this.uid].skin='lab_guy1';
+		}
+	},
 	hotKeys:function(key){
 		switch(key){
 			case 88: // X/M bag
@@ -340,16 +362,15 @@ var Map=
 			break;
 		}
 	},
-	killPlayer:function(){
-		$('#myPlayer').remove();	
+	killPlayer:function(uid){
+		$('#player'+uid).remove();	
 	},
-	addPlayer:function()
+	addPlayer:function(uid)
 	{
-		if($('#myPlayer').length<1){
-			var html='<div id="myPlayer" class="player">'+
-				'<img style="z-index:2;position: absolute;" src="images/avatars/0Down.png"/>'+
-			'</div>';
-			$('#'+Map.mapDiv).prepend(html);	
+		if($('#player'+uid).length<1){
+			this.defaultPlayer(uid);//check if has basic player schema
+			var html='<div id="player'+uid+'" class="mapSprite '+this.playerPos[uid].skin+' player"></div>';
+			$('#'+Map.mapDiv).prepend(html);
 		}else{
 			return false;
 		}

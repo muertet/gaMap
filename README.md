@@ -9,6 +9,7 @@ Uses:
 * jQuery
 * jQuery UI
 * Collision (http://sourceforge.net/projects/jquerycollision/)
+* NodeJS (soon)
 
 Available functions:
 
