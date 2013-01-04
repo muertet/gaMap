@@ -9,7 +9,8 @@ Uses:
 * jQuery
 * jQuery UI
 * Collision (http://sourceforge.net/projects/jquerycollision/)
-* NodeJS (soon)
+* NodeJS (for multiplayer only)
+* Socket.io (for multiplayer only)
 
 Available functions:
 
@@ -25,6 +26,7 @@ Map class
 * Map.killPlayer
 * Map.addPlayer
 * Map.abort
+* Map.emit
 
 Editor class
 =====
