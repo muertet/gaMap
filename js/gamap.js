@@ -1,6 +1,6 @@
 var Map=
 {
-	mapDiv:"currentMap",
+    mapDiv:"currentMap",
 	mapSize:{x:336,y:240},
 	areas:{},
 	mapPos:{},
@@ -74,7 +74,7 @@ var Map=
 			this.socket = io.connect(this.multiplayer);
 			socket=this.socket;
 			socket.on('getId', function (data) {
-				console.log('new uid assigned: '+data.uid);
+				consola.log('new uid assigned: '+data.uid);
 				
 				if(typeof Map.playerPos[0] =='undefined'){
 					Map.defaultPlayer(data.uid);
@@ -93,17 +93,17 @@ var Map=
 					}
 				});
 				socket.on('newPlayer',function(playerPos){
-					if(Map.debug){console.log('player '+playerPos.uid+' joined the game');}
+					consola.log('player '+playerPos.uid+' joined the game');
 					Map.playerPos[playerPos.uid]=playerPos;
 					Map.addPlayer(playerPos.uid);
 				});
 				socket.on('movePlayer',function(playerPos){
 					if(playerPos.uid==Map.uid){return false;}
-					console.log('movePlayer recieved',playerPos.uid,playerPos.x,playerPos.y);
+					consola.log('movePlayer recieved',playerPos.uid,playerPos.x,playerPos.y);
 					Map.movePlayer(playerPos.uid,playerPos);
 				});
 				socket.on('killPlayer',function(uid){
-					console.log('killPlayer recieved',uid);
+					consola.log('killPlayer recieved',uid);
 					Map.killPlayer(uid);
 				});
 			});
@@ -150,7 +150,7 @@ var Map=
 			}
 			if(found){break;}
 		}
-		if(this.debug){console.log("Using teleport "+teleportId+" to "+area);}
+		consola.log("Using teleport "+teleportId+" to "+area);
 		
 		$('#'+this.mapDiv+' item').remove(); //unload items
 		this.killPlayer(this.uid); //to respawn it in addItems
@@ -247,17 +247,17 @@ var Map=
 				{
 					var itm=collisions[0],
 						name=$(itm).attr('name');
-					//console.log(items[itm]);
+					//consola.log(items[itm]);
 					
 					if(items[name].type=='solid'){
-						//console.log(pixels,lastI,property,Map.playerPos.x,Map.playerPos.y);
+						//consola.log(pixels,lastI,property,Map.playerPos.x,Map.playerPos.y);
 						$('#player'+uid).css(property,lastI+'px');
 						if(property=='left'){
 							Map.playerPos[uid].x=lastI;
 						}else{
 							Map.playerPos[uid].y=lastI;
 						}
-						console.log('cant');return false;
+						consola.log('cant');return false;
 					}else if(items[name].type=='teleport'){
 						var to=$(itm).attr('to');
 						Map.changeArea(to);
@@ -286,7 +286,7 @@ var Map=
 			Map.playerPos[uid].position=avatar;
 
 		}else{
-			if(this.debug){console.log('moving player pos ('+uid+','+obj.x+','+obj.y+')')};
+			consola.log('moving player pos ('+uid+','+obj.x+','+obj.y+')');
 			$('#player'+uid).css('left',obj.x);
 			$('#player'+uid).css('top',obj.y);
 			
@@ -433,3 +433,28 @@ var Map=
 function isInteger(s) {
   return (s.toString().search(/^-?[0-9]+$/) == 0);
 }
+//* https://github.com/naxhh/Useful-Codes  Logger*//
+var Logger = function(level) {
+
+    if (typeof Map.debug == "undefined") {
+        this.DEBUG = true;
+    } else {
+        this.DEBUG = Map.debug;
+    }
+
+    this.level = level || 1;
+}
+/**
+* Logs a message (ej: New Logger().log("texto a log"));
+* @param {string} msg The message
+*/
+Logger.prototype.log = function(msg) {
+    if (typeof msg === "undefined") return;
+
+    if (this.level === 1 && Map.debug == true) {
+        console.log(msg);
+    } else if (this.level === 2) {
+        alert(msg);
+    }
+}
+var consola=new Logger();
