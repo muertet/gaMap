@@ -223,5 +223,31 @@ var Editor={
 		if(teleportId==-1){return false;}
 		$('[teleportid='+teleportId+']').attr('to',to);
 		$('#teleportSelect').remove();
+	},
+	coverBackground:function()
+	{
+		var i=0,
+			e=0,
+			obj={x:48,y:32},
+			temp={name:"cave_land",x:0,y:0};
+		while(e<Map.mapSize.x)
+		{
+			while(i<Map.mapSize.y)
+			{
+				 //check if exceeds map limits
+				if(i+obj.y>Map.mapSize.y){
+					i-=(i+obj.y)-Map.mapSize.y;
+				}
+				if(e+obj.x>Map.mapSize.x){
+					e-=(e+obj.x)-Map.mapSize.x;
+				}
+				temp.x=e;
+				temp.y=i;
+				Map.addItem(temp);
+				i+=obj.y;
+			}
+			e+=obj.x;
+			i=0;
+		}
 	}
 };
