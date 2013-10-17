@@ -1,6 +1,11 @@
 gaMap
 =====
 
+DO NOT USE
+=====
+
+there are better alternatives using HTML5+MONGODB+SOCKET.JS
+
 2D jQuery based mapping system for games (pokemon like).
 
 Pic: http://i47.tinypic.com/2ujjg46.png
